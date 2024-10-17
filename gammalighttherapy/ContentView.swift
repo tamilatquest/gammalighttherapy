@@ -7,20 +7,19 @@ struct FlashingView: View {
     @State private var screenFlashTimer: Timer?
     private let screenFlashRate: Double = 1.0 / 40.0
     
+    let screenLightManager = ScreenLightManager()
+    
     var body: some View {
         ZStack {
-            if isScreenPlaying {
-                Color(isScreenFlickering ? .black : .white)
-                    .edgesIgnoringSafeArea(.all)
-                    .animation(.easeInOut(duration: screenFlashRate), value: isScreenFlickering)
-            } else {
-                Color(hex: "212121").edgesIgnoringSafeArea(.all)
-            }
-
+            Color(hex: "212121").edgesIgnoringSafeArea(.all)
+            
             VStack {
                 Spacer()
-
-                if !isScreenPlaying {
+                if isScreenPlaying {
+                    VideoPlayerView(isScreenPlaying: $isScreenPlaying)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity) // Full width and height
+                        .edgesIgnoringSafeArea(.all) // Ignore safe areas
+                } else {
                     Image("logo")
                         .resizable()
                         .scaledToFit()
@@ -29,48 +28,36 @@ struct FlashingView: View {
                 }
 
                 Spacer()
-
+                
                 HStack {
                     FlashLightView()
                     AudioView()
                     CombinedView()
-
-                    Button(action: {
-                        isScreenPlaying.toggle()
-                        toggleScreenFlickering()
-                    }) {
-                        Image(isScreenPlaying ? "brightness" : "brightness-off")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .padding()
-                    }
+                    ScreenLightView(isScreenPlaying: $isScreenPlaying, toggleScreenFlickering: toggleScreenFlickering)
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity) // Make sure the HStack stretches full width
                 .background(Color(hex: "2f2f2f"))
                 .cornerRadius(10)
+                
             }
         }
-        .edgesIgnoringSafeArea(.bottom)
         .onAppear {
-            startFlickering()
+            if isScreenPlaying {
+                screenLightManager.playVideo(on: UIView())
+            }
         }
         .onDisappear {
-            stopFlickering()
+            stopFlickering() // Stop flickering when view disappears
         }
     }
-
 
     private func startFlickering() {
         isScreenFlickering = true
-        screenFlashTimer = Timer.scheduledTimer(withTimeInterval: screenFlashRate, repeats: true) { _ in
-            isScreenFlickering.toggle()
-        }
+        screenLightManager.playVideo(on: UIView()) // Ensure the video plays
     }
 
     private func stopFlickering() {
-        isScreenFlickering = false
-        screenFlashTimer?.invalidate()
-        screenFlashTimer = nil
+        screenLightManager.stopVideo() // Stop video playback
     }
 
     private func toggleScreenFlickering() {
@@ -84,12 +71,10 @@ struct FlashingView: View {
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            FlashingView()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(hex: "212121"))
-        .edgesIgnoringSafeArea(.all)
+        FlashingView()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(hex: "212121"))
+            .edgesIgnoringSafeArea(.all)
     }
 }
 

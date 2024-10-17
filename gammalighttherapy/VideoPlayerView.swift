@@ -1,18 +1,71 @@
-//
-//  VideoPlayerView.swift
-//  gammalighttherapy
-//
-//  Created by Tamilarasan on 17/10/24.
-//
-
 import SwiftUI
+import AVKit
 
 struct VideoPlayerView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
+    @Binding var isScreenPlaying: Bool
+    @State private var player: AVPlayer?
+    @State private var playerItem: AVPlayerItem?
 
-#Preview {
-    VideoPlayerView()
+    var body: some View {
+        VStack {
+            if let player = player {
+                CustomVideoPlayer(isScreenPlaying: $isScreenPlaying, player: player)
+                    .onAppear {
+                        if isScreenPlaying {
+                            player.play()
+                        }
+                    }
+                    .onDisappear {
+                        player.pause()
+                    }
+            } else {
+                Text("Loading video...")
+            }
+        }
+        .onAppear {
+            loadVideo()
+        }
+        .onChange(of: isScreenPlaying) { playing in
+            if playing {
+                player?.play()
+            } else {
+                player?.pause()
+            }
+        }
+    }
+    
+    private func loadVideo() {
+        let videoFile = getVideoFileForRefreshRate()
+
+        guard let videoURL = Bundle.main.url(forResource: videoFile, withExtension: "mp4") else {
+            print("Video file not found")
+            return
+        }
+        
+        playerItem = AVPlayerItem(url: videoURL)
+        player = AVPlayer(playerItem: playerItem)
+        
+        // Ensure the player does not stop when video ends
+        player?.actionAtItemEnd = .none
+        
+        // Add observer to loop video
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem,
+            queue: .main
+        ) { [weak player] _ in
+            player?.seek(to: .zero)  // Seek to the beginning of the video
+            player?.play()           // Play again
+        }
+    }
+
+    private func getScreenRefreshRate() -> Double {
+        let screen = UIScreen.main
+        return Double(screen.maximumFramesPerSecond)
+    }
+
+    private func getVideoFileForRefreshRate() -> String {
+        let refreshRate = getScreenRefreshRate()
+        return refreshRate < 60 ? "30FPS_AV" : "120Hz_AV"
+    }
 }

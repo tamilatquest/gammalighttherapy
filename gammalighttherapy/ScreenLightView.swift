@@ -8,11 +8,22 @@
 import SwiftUI
 
 struct ScreenLightView: View {
+    @Binding var isScreenPlaying: Bool
+    let toggleScreenFlickering: () -> Void
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button(action: {
+            isScreenPlaying.toggle()
+            toggleScreenFlickering()
+        }) {
+            Image(isScreenPlaying ? "brightness" : "brightness-off")
+                .resizable()
+                .frame(width: 32, height: 32)
+                .padding()
+        }
     }
 }
 
 #Preview {
-    ScreenLightView()
+    ScreenLightView(isScreenPlaying: .constant(false), toggleScreenFlickering: {})
 }
