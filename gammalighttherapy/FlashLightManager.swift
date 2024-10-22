@@ -1,42 +1,56 @@
-//
-//  FlashLightManager.swift
-//  gammalighttherapy
-//
-//  Created by Tamilarasan on 11/10/24.
-//
-
-import SwiftUI
 import AVFoundation
 
 class FlashLightManager {
-    private var flashTimer: Timer?
+    private var flashTimer: DispatchSourceTimer?
     private let flashRate: Double = 1.0 / 40.0
-    
+    private var isFlashlightOn = false
+
+    // Starts the flashlight flickering at 40Hz
     func startFlashing() {
-        flashTimer = Timer.scheduledTimer(withTimeInterval: flashRate, repeats: true) { _ in
-            self.toggleTorch(on: true)
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + self.flashRate) {
-                self.toggleTorch(on: false)
+        if flashTimer == nil {
+            flashTimer = DispatchSource.makeTimerSource()
+            flashTimer?.schedule(deadline: .now(), repeating: flashRate)
+            flashTimer?.setEventHandler { [weak self] in
+                self?.toggleTorch()
             }
+            flashTimer?.activate()
         }
     }
 
+    // Stops the flashing and ensures the flashlight is turned off
     func stopFlashing() {
-        self.toggleTorch(on: false)
-        flashTimer?.invalidate()
-        flashTimer = nil
+        if isFlashlightOn {
+            toggleTorch(on: false) // Ensure the flashlight is off
+        }
+
+        // Safely cancel and release the timer
+        if let timer = flashTimer {
+            timer.cancel()
+            flashTimer = nil
+        }
     }
 
-    private func toggleTorch(on: Bool) {
+    // Toggles the torch on and off
+    private func toggleTorch(on: Bool? = nil) {
         guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
+
         do {
             try device.lockForConfiguration()
-            if on {
-                try device.setTorchModeOn(level: 1.0)
+
+            if let shouldTurnOn = on {
+                device.torchMode = shouldTurnOn ? .on : .off
+                if shouldTurnOn {
+                    try device.setTorchModeOn(level: 1.0) // Set max brightness
+                }
+                isFlashlightOn = shouldTurnOn
             } else {
-                device.torchMode = .off
+                isFlashlightOn.toggle()
+                device.torchMode = isFlashlightOn ? .on : .off
+                if isFlashlightOn {
+                    try device.setTorchModeOn(level: 1.0)
+                }
             }
+
             device.unlockForConfiguration()
         } catch {
             print("Torch could not be used: \(error)")

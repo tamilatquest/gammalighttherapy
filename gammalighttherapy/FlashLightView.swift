@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct FlashLightView: View {
-    @State private var isFlashing = false
+    @Binding var isFlashing: Bool
+    var isDisabled: Bool
     let fashLightManager = FlashLightManager()
     let hapticManager = HapticManager()
     
@@ -26,13 +27,14 @@ struct FlashLightView: View {
             Image(systemName: isFlashing ? "lightbulb.fill" : "lightbulb")
                 .resizable()
                 .frame(width: 25, height: 32)
+                .opacity(isDisabled ? 0.5 : 1.0)
                 .foregroundColor(isFlashing ? .yellow : Color(hex: "f0f0f0"))
                 .padding()
         }
-        
+        .disabled(isDisabled)
     }
 }
 
 #Preview {
-    FlashLightView()
+    FlashLightView(isFlashing: .constant(false), isDisabled: false)
 }

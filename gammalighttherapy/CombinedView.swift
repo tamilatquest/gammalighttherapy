@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct CombinedView: View {
-    @State private var isCombined = false
+    @Binding var isCombined: Bool
+    var isDisabled: Bool
     let audioManager = AudioManager()
     let flashLightManager = FlashLightManager()
     let hapticManager = HapticManager()
@@ -28,12 +29,14 @@ struct CombinedView: View {
         }) {
             Image(isCombined ? "competence" : "competence-off")
                 .resizable()
+                .opacity(isDisabled ? 0.5 : 1.0)
                 .frame(width: 32, height: 32)
                 .padding()
         }
+        .disabled(isDisabled)
     }
 }
 
 #Preview {
-    CombinedView()
+    CombinedView(isCombined: .constant(false), isDisabled: false)
 }

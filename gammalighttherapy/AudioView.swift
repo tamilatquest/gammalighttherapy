@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct AudioView: View {
-    @State private var isAudioPlaying = false
+    @Binding var isAudioPlaying: Bool
+    var isDisabled: Bool
     let audioManager = AudioManager()
     
     var body: some View {
@@ -22,10 +23,12 @@ struct AudioView: View {
         }) {
             Image(systemName: isAudioPlaying ? "speaker.fill" : "speaker.slash.fill")
                 .resizable()
+                .opacity(isDisabled ? 0.5 : 1.0)
                 .frame(width: 32, height: 32)
                 .foregroundColor(isAudioPlaying ? .blue : Color(hex: "f0f0f0"))
                 .padding()
         }
+        .disabled(isDisabled)
     }
     
     private func stopSound() {
@@ -38,5 +41,6 @@ struct AudioView: View {
 }
 
 #Preview {
-    AudioView()
+    AudioView(isAudioPlaying: .constant(false), isDisabled: false)
 }
+

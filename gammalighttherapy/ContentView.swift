@@ -3,7 +3,27 @@ import AVFoundation
 
 struct FlashingView: View {
     @State private var isScreenPlaying = false
-    @State private var isScreenFlickering = false
+    @State private var isFlashing = false
+    @State private var isAudioPlaying = false
+    @State private var isCombined = false
+    
+    private var isFlashDisabled: Bool {
+        isAudioPlaying || isScreenPlaying || isCombined
+    }
+    
+    private var isAudiDisabled: Bool {
+        isFlashing || isScreenPlaying || isCombined
+    }
+    
+    private var isCombinedDisabled: Bool {
+        isAudioPlaying || isScreenPlaying || isFlashing
+    }
+    
+    private var isScreenDisabled: Bool {
+        isAudioPlaying || isCombined || isFlashing
+    }
+
+    
     @State private var screenFlashTimer: Timer?
     private let screenFlashRate: Double = 1.0 / 40.0
     
@@ -17,8 +37,8 @@ struct FlashingView: View {
                 Spacer()
                 if isScreenPlaying {
                     VideoPlayerView(isScreenPlaying: $isScreenPlaying)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity) // Full width and height
-                        .edgesIgnoringSafeArea(.all) // Ignore safe areas
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .edgesIgnoringSafeArea(.all)
                 } else {
                     Image("logo")
                         .resizable()
@@ -30,10 +50,10 @@ struct FlashingView: View {
                 Spacer()
                 
                 HStack {
-                    FlashLightView()
-                    AudioView()
-                    CombinedView()
-                    ScreenLightView(isScreenPlaying: $isScreenPlaying, toggleScreenFlickering: toggleScreenFlickering)
+                    FlashLightView(isFlashing: $isFlashing, isDisabled: isFlashDisabled)
+                    AudioView(isAudioPlaying: $isAudioPlaying, isDisabled: isAudiDisabled)
+                    CombinedView(isCombined: $isCombined, isDisabled: isCombinedDisabled )
+                    ScreenLightView(isScreenPlaying: $isScreenPlaying, isDisabled: isScreenDisabled, toggleScreenFlickering: toggleScreenFlickering)
                 }
                 .frame(maxWidth: .infinity) // Make sure the HStack stretches full width
                 .background(Color(hex: "2f2f2f"))
@@ -52,7 +72,6 @@ struct FlashingView: View {
     }
 
     private func startFlickering() {
-        isScreenFlickering = true
         screenLightManager.playVideo(on: UIView()) // Ensure the video plays
     }
 
