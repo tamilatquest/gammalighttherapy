@@ -2,24 +2,33 @@ import SwiftUI
 import AVFoundation
 
 struct FlashingView: View {
-    @State private var selectedTab = 0
+    @State private var selectedTab = 2
     
     var body: some View {
         ZStack {
             TabView(selection: $selectedTab) {
                 FlashLightView()
                     .tabItem {
-                        CustomTabItem(title: "Flash", iconName: "flashlight.on.fill", isSelected: selectedTab == 1)
+                        CustomTabItem(title: "Flash", iconName: "flashlight.on.fill", isSelected: selectedTab == 0)
                     }
+                    .tag(0)
+                
                 ScreenLightView()
                     .tabItem {
-                        CustomTabItem(title: "Screen", iconName: "doc.plaintext.fill", isSelected: selectedTab == 0)
+                        CustomTabItem(title: "Screen", iconName: "doc.plaintext.fill", isSelected: selectedTab == 1)
                     }
+                    .tag(1)
+                
+                HomeView()
+                    .tabItem {
+                        CustomTabItem(title: "Stop", iconName: "stop.fill", isSelected: selectedTab == 2)
+                    }
+                    .tag(2)
             }
             .accentColor(.blue)
-            .onAppear(perform: {
+            .onAppear {
                 UITabBar.appearance().unselectedItemTintColor = .darkGray
-            })
+            }
         }
         .background(.blue)
         .edgesIgnoringSafeArea(.all)

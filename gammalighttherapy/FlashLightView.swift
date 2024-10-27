@@ -11,6 +11,7 @@ struct FlashLightView: View {
     @State var isFlashing: Bool = true
     let fashLightManager = FlashLightManager()
     let hapticManager = HapticManager()
+    let audioManager = AudioManager()
     
     var body: some View {
         ZStack {
@@ -25,10 +26,12 @@ struct FlashLightView: View {
         .onAppear {
             fashLightManager.startFlashing()
             hapticManager.playHapticAt40Hz()
+            audioManager.playSound()
         }
         .onDisappear {
             fashLightManager.stopFlashing()
             hapticManager.stopHaptic()
+            audioManager.stopSound()
         }
     }
 }
