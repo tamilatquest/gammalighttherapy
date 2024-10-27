@@ -11,7 +11,7 @@ struct CombinedView: View {
     @Binding var isCombined: Bool
     var isDisabled: Bool
     let audioManager = AudioManager()
-    let flashLightManager = FlashLightManager()
+    @StateObject var flashLightManager = FlashLightManager()
     let hapticManager = HapticManager()
     
     var body: some View {

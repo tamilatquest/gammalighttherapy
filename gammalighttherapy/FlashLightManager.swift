@@ -1,39 +1,58 @@
 import AVFoundation
-
-class FlashLightManager {
+import Combine
+class FlashLightManager: ObservableObject {
+    static let shared = FlashLightManager()
     private var flashTimer: Timer?
-    private let flashRate: Double = 1.0 / 40.0
     private var isTorchOn = false
+    
+    private var flashRate: Double = 0.025 { // Set default flash rate to 0.025
+        didSet {
+            if flashRate < 0.025 { flashRate = 0.025 } // enforce a minimum rate
+        }
+    }
 
-    func startFlashing() {
-        stopFlashing() // Ensure any previous timer is stopped
-        flashTimer = Timer.scheduledTimer(timeInterval: flashRate, target: self, selector: #selector(toggleFlash), userInfo: nil, repeats: true)
+    // Change this to internal or public
+    init() {} // Prevent external instantiation
+
+    func startFlashing(with rate: Double? = nil) {
+        if let rate = rate {
+            self.flashRate = rate
+        }
+        stopFlashing() // Stop any existing flashing
+
+        flashTimer = Timer.scheduledTimer(withTimeInterval: flashRate, repeats: true) { [weak self] _ in
+            self?.toggleFlash()
+        }
     }
 
     @objc private func toggleFlash() {
-        isTorchOn.toggle() // Toggle the state
+        isTorchOn.toggle()
         toggleTorch(on: isTorchOn)
     }
 
     func stopFlashing() {
         flashTimer?.invalidate()
         flashTimer = nil
-        isTorchOn = false // Reset the state to ensure torch stays off
-        toggleTorch(on: false) // Ensure torch is off
+        if isTorchOn {
+            isTorchOn = false
+            toggleTorch(on: false)
+        }
     }
 
     private func toggleTorch(on: Bool) {
-        guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
-        do {
-            try device.lockForConfiguration()
-            if on {
-                try device.setTorchModeOn(level: 1.0)
-            } else {
-                device.torchMode = .off
+        // Ensure all torch manipulations are on the main thread
+        DispatchQueue.main.async {
+            guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
+            do {
+                try device.lockForConfiguration()
+                device.torchMode = on ? .on : .off
+                if on {
+                    try device.setTorchModeOn(level: 1.0)
+                }
+                device.unlockForConfiguration()
+            } catch {
+                print("Torch could not be used: \(error.localizedDescription)")
             }
-            device.unlockForConfiguration()
-        } catch {
-            print("Torch could not be used: \(error)")
         }
     }
 }

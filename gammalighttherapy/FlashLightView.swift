@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FlashLightView: View {
-    let fashLightManager = FlashLightManager()
+    @StateObject var flashLightManager = FlashLightManager()
     let hapticManager = HapticManager()
     let audioManager = AudioManager()
     
@@ -23,12 +23,12 @@ struct FlashLightView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(hex: "d3d3d3"))
         .onAppear {
-            fashLightManager.startFlashing()
+            flashLightManager.startFlashing()
             hapticManager.playHapticAt40Hz()
             audioManager.playSound()
         }
         .onDisappear {
-            fashLightManager.stopFlashing()
+            flashLightManager.stopFlashing()
             hapticManager.stopHaptic()
             audioManager.stopSound()
         }
