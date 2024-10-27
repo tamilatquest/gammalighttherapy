@@ -2,7 +2,7 @@ import SwiftUI
 import AVKit
 
 struct VideoPlayerView: View {
-    @Binding var isScreenPlaying: Bool
+    @State var isScreenPlaying: Bool =  true
     @State private var player: AVPlayer?
     @State private var playerItem: AVPlayerItem?
 
@@ -45,17 +45,15 @@ struct VideoPlayerView: View {
         playerItem = AVPlayerItem(url: videoURL)
         player = AVPlayer(playerItem: playerItem)
         
-        // Ensure the player does not stop when video ends
         player?.actionAtItemEnd = .none
         
-        // Add observer to loop video
         NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: playerItem,
             queue: .main
         ) { [weak player] _ in
-            player?.seek(to: .zero)  // Seek to the beginning of the video
-            player?.play()           // Play again
+            player?.seek(to: .zero)
+            player?.play()
         }
     }
 

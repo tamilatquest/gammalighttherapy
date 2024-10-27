@@ -8,25 +8,23 @@
 import SwiftUI
 
 struct ScreenLightView: View {
-    @Binding var isScreenPlaying: Bool
-    var isDisabled: Bool
-    let toggleScreenFlickering: () -> Void
+    let screenLightManager = ScreenLightManager()
 
     var body: some View {
-        Button(action: {
-            isScreenPlaying.toggle()
-            toggleScreenFlickering()
-        }) {
-            Image(isScreenPlaying ? "brightness" : "brightness-off")
-                .resizable()
-                .opacity(isDisabled ? 0.5 : 1.0)
-                .frame(width: 32, height: 32)
-                .padding()
+        ZStack {
+            VideoPlayerView()
+                .edgesIgnoringSafeArea(.all)
         }
-        .disabled(isDisabled)
+        .onAppear {
+            screenLightManager.playVideo(on: UIView())
+        }
+        .onDisappear {
+            screenLightManager.stopVideo()
+        }
+        
     }
 }
 
 #Preview {
-    ScreenLightView(isScreenPlaying: .constant(false), isDisabled: false, toggleScreenFlickering: {})
+    ScreenLightView()
 }

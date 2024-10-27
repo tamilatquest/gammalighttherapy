@@ -8,33 +8,31 @@
 import SwiftUI
 
 struct FlashLightView: View {
-    @Binding var isFlashing: Bool
-    var isDisabled: Bool
+    @State var isFlashing: Bool = true
     let fashLightManager = FlashLightManager()
     let hapticManager = HapticManager()
     
     var body: some View {
-        Button(action: {
-            isFlashing.toggle()
-            if isFlashing {
-                fashLightManager.startFlashing()
-                hapticManager.playHapticAt40Hz()
-            } else {
-                fashLightManager.stopFlashing()
-                hapticManager.stopHaptic()
-            }
-        }) {
-            Image(systemName: isFlashing ? "lightbulb.fill" : "lightbulb")
+        ZStack {
+            Image("logo")
                 .resizable()
-                .frame(width: 25, height: 32)
-                .opacity(isDisabled ? 0.5 : 1.0)
-                .foregroundColor(isFlashing ? .yellow : Color(hex: "f0f0f0"))
+                .scaledToFit()
+                .frame(width: 200, height: 200)
                 .padding()
         }
-        .disabled(isDisabled)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(hex: "d3d3d3"))
+        .onAppear {
+            fashLightManager.startFlashing()
+            hapticManager.playHapticAt40Hz()
+        }
+        .onDisappear {
+            fashLightManager.stopFlashing()
+            hapticManager.stopHaptic()
+        }
     }
 }
 
 #Preview {
-    FlashLightView(isFlashing: .constant(false), isDisabled: false)
+    FlashLightView()
 }
