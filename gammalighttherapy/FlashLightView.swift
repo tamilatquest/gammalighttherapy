@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct FlashLightView: View {
-    @State var isFlashing: Bool = true
     let fashLightManager = FlashLightManager()
     let hapticManager = HapticManager()
     let audioManager = AudioManager()

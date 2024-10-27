@@ -4,28 +4,22 @@ class FlashLightManager {
     private var flashTimer: Timer?
     private let flashRate: Double = 1.0 / 40.0
     private var isTorchOn = false
-    private let controlQueue = DispatchQueue(label: "com.flashLight.controlQueue") // For synchronized control
 
     func startFlashing() {
-        stopFlashing() // Stop any existing flash before starting
+        stopFlashing() // Ensure any previous timer is stopped
         flashTimer = Timer.scheduledTimer(timeInterval: flashRate, target: self, selector: #selector(toggleFlash), userInfo: nil, repeats: true)
     }
 
     @objc private func toggleFlash() {
-        controlQueue.sync { // Synchronize torch access
-            isTorchOn.toggle() // Toggle the torch state
-            toggleTorch(on: isTorchOn)
-        }
+        isTorchOn.toggle() // Toggle the state
+        toggleTorch(on: isTorchOn)
     }
 
     func stopFlashing() {
-        flashTimer?.invalidate() // Stop the timer
+        flashTimer?.invalidate()
         flashTimer = nil
-
-        controlQueue.sync { // Force turn off the torch in a synchronized manner
-            isTorchOn = false
-            toggleTorch(on: false) // Ensure torch is off
-        }
+        isTorchOn = false // Reset the state to ensure torch stays off
+        toggleTorch(on: false) // Ensure torch is off
     }
 
     private func toggleTorch(on: Bool) {

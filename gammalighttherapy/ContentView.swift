@@ -12,7 +12,7 @@ struct FlashingView: View {
                         CustomTabItem(title: "Flash", iconName: "flashlight.on.fill", isSelected: selectedTab == 0)
                     }
                     .tag(0)
-                
+
                 ScreenLightView()
                     .tabItem {
                         CustomTabItem(title: "Screen", iconName: "doc.plaintext.fill", isSelected: selectedTab == 1)
