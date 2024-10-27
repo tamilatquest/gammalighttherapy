@@ -12,8 +12,9 @@ class ScreenLightManager {
     }
 
     func getVideoFileForRefreshRate() -> String {
-        let refreshRate = getScreenRefreshRate()
-        return refreshRate < 60 ? "30FPS_AV" : "120Hz_AV"
+//        let refreshRate = getScreenRefreshRate()
+//        return refreshRate < 60 ? "30FPS_AV" : "120Hz_AV"
+        return "30Hz_AV"
     }
 
     func playVideo(on view: UIView) {
