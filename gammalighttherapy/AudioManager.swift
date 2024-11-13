@@ -18,7 +18,7 @@ class AudioManager {
     func playSound() {
         configureAudioSession()
 
-        guard let audioFileURL = Bundle.main.url(forResource: "40hz", withExtension: "wav") else {
+        guard let audioFileURL = Bundle.main.url(forResource: "40Hz-Audio", withExtension: "m4a") else {
             print("Audio file not found")
             return
         }
@@ -37,7 +37,7 @@ class AudioManager {
             try audioFile.read(into: buffer)
 
             playerNode.scheduleBuffer(buffer, at: nil, options: .loops, completionHandler: nil)
-
+            playerNode.volume = 9.0
             playerNode.play()
 
             self.audioPlayerNode = playerNode
